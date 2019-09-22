@@ -54,7 +54,23 @@ RUN apt-get clean autoclean \
 
 
 
-FROM wineStage as setupStage
+
+FROM wineStage as steamStage
+# Install steamcmd and clear apts caches
+# Link steamcmd binary to /usr/bin to use it in PATH
+RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
+    apt-get install -y steamcmd:i386 && rm -rf /var/lib/apt/lists/* && \
+    ln -s /usr/games/steamcmd /usr/bin/steamcmd
+
+# Clean Apt Data
+RUN apt-get clean autoclean \
+    	&& apt-get autoremove -y \
+    	&& rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+
+
+
+FROM steamStage as setupStage
 #### PREPARE ALL ENVIRONMENT DEFAULTS FOR USAGE WITH DOCKER COMPOSE ####
 # The following part was gladly adapted and extended
 # from https://github.com/bregell/docker_space_engineers_server/blob/38c7d3d8f2b6bdbfcfb45f84b3b2df1c128eb99f/Dockerfile

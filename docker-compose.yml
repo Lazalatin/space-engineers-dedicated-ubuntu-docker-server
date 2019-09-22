@@ -2,13 +2,14 @@ version: '3'
 services:
   space:
     build: .
-    image: space-engineers-dedicated-ubuntu-docker-server:v1
+    image: lazalatin/space-engineers-dedicated-ubuntu-docker-server:v1
     ports:
       - "8766:8766/udp"
       - "27016:27016/udp"
       - "8080:2020/tcp"
     volumes:
-      - ./SEServer_Data:/mnt/root/space-engineers-server
+      - ./SEServer_Data:/mnt/root/space-engineers-server/
+      - ./Saved_Worlds:/mnt/root/space-engineers-server/config/Saves
     environment:
       - SERVER_NAME=DockerDedicated
       - WORLD_NAME=DockerWorld
