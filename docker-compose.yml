@@ -6,14 +6,13 @@ services:
     ports:
       - "8766:8766/udp"
       - "27016:27016/udp"
-      - "8080:2020/tcp"
+      - "8080:8080/tcp"
     volumes:
-      - ./SEServer_Data:/mnt/root/space-engineers-server/
-      - ./Saved_Worlds:/mnt/root/space-engineers-server/config/Saves
+      - /opt/space-engineers-server:/mnt/root/space-engineers-server/
     environment:
       - SERVER_NAME=DockerDedicated
       - WORLD_NAME=DockerWorld
       - STEAM_PORT=8766
       - SERVER_PORT=27016
-      - REMOTE_CLIENT_PORT=8080
+      - REMOTE_API_PORT=8080
       #- WINEDEBUG=-all # Uncomment to make wine all quiet

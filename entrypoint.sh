@@ -42,13 +42,14 @@ if [ ! -f ${CONFIG}/SpaceEngineers-Dedicated.cfg ]; then
 fi
 
 # Change ports
-sed -i 's=<SteamPort>.*</SteamPort>=<SteamPort>'${STEAM_PORT}'</SteamPort>=g' ${CONFIG}/SpaceEngineers-Dedicated.cfg
-sed -i 's=<ServerPort>.*</ServerPort>=<ServerPort>'${SERVER_PORT}'</ServerPort>=g' ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<SteamPort>.*</SteamPort>=<SteamPort>${STEAM_PORT}</SteamPort>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<ServerPort>.*</ServerPort>=<ServerPort>${SERVER_PORT}</ServerPort>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<RemoteApiPort>.*</RemoteApiPort>=<RemoteApiPortPort>${REMOTE_API_PORT}</RemoteApiPort>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
 
 # Change save path to value from config
-sed -i 's=<ServerName>.*</ServerName>=<ServerName>'${SERVER_NAME}'</ServerName>=g' ${CONFIG}/SpaceEngineers-Dedicated.cfg
-sed -i 's=<WorldName>.*</WorldName>=<WorldName>'${WORLD_NAME}'</WorldName>=g' ${CONFIG}/SpaceEngineers-Dedicated.cfg
-sed -i 's=<LoadWorld>.*</LoadWorld>=<LoadWorld>Z:\\mnt\\root\\space-engineers-server\\config\\Saves\\'${WORLD_NAME}'</LoadWorld>=g' ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<ServerName>.*</ServerName>=<ServerName>${SERVER_NAME}</ServerName>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<WorldName>.*</WorldName>=<WorldName>${WORLD_NAME}</WorldName>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
+sed -i "s=<LoadWorld>.*</LoadWorld>=<LoadWorld>Z:\\\mnt\\\root\\\space-engineers-server\\\config\\\Saves\\\'${WORLD_NAME}'</LoadWorld>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
 
 steamcmd +login anonymous +force_install_dir ${WORK} +app_update 298740 +quit
 cd ${WORK}/DedicatedServer64
