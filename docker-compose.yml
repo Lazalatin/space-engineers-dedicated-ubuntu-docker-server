@@ -8,7 +8,8 @@ services:
       - "27016:27016/udp"
       - "8080:8080/tcp"
     volumes:
-      - /opt/space-engineers-server:/mnt/root/space-engineers-server/
+      - /opt/SpaceEngineersDedicatedServer:/root/.wine/drive_c/SpaceEngineersDedicatedServer/
+      - /opt/SpaceEngineersDedicated:/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated/
     environment:
       - SERVER_NAME=DockerDedicated
       - WORLD_NAME=DockerWorld

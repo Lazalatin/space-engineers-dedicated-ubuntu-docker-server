@@ -23,7 +23,7 @@ FROM preStage as wineStage
 ENV WINEARCH=win64
 # Initalize winetricks script and additional dependencies
 ADD resources/install_winetricks.sh /root/install_winetricks.sh
-RUN apt-get install --no-install-recommends --no-install-suggests -y cabextract apt-transport-https samba && \
+RUN apt-get install --no-install-recommends --no-install-suggests -y cabextract apt-transport-https && \
     bash /root/install_winetricks.sh && rm /root/install_winetricks.sh
 
 # Initialize repositories for wine and install it
@@ -54,7 +54,6 @@ RUN apt-get clean autoclean \
 
 
 
-
 FROM wineStage as steamStage
 # Install steamcmd and clear apts caches
 # Link steamcmd binary to /usr/bin to use it in PATH
@@ -62,21 +61,15 @@ RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
     apt-get install -y steamcmd:i386 && rm -rf /var/lib/apt/lists/* && \
     ln -s /usr/games/steamcmd /usr/bin/steamcmd
 
-# Clean Apt Data
-RUN apt-get clean autoclean \
-    	&& apt-get autoremove -y \
-    	&& rm -rf /var/lib/{apt,dpkg,cache,log}/
-
-
-
+RUN apt-get update && apt-get install -y winbind
 
 FROM steamStage as setupStage
 #### PREPARE ALL ENVIRONMENT DEFAULTS FOR USAGE WITH DOCKER COMPOSE ####
 # The following part was gladly adapted and extended
 # from https://github.com/bregell/docker_space_engineers_server/blob/38c7d3d8f2b6bdbfcfb45f84b3b2df1c128eb99f/Dockerfile
 # Licenced under MIT by Johan Bregell
-ENV WORK "/mnt/root/space-engineers-server"
-ENV CONFIG "/mnt/root/space-engineers-server/config"
+ENV WORK "/root/.wine/drive_c/SpaceEngineersDedicatedServer"
+ENV CONFIG "/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated"
 ENV SERVER_NAME DockerDedicated
 ENV WORLD_NAME DockerWorld
 ENV STEAM_PORT 8766
@@ -85,7 +78,6 @@ ENV REMOTE_API_PORT 8080
 
 RUN mkdir -p ${WORK}
 RUN mkdir -p ${CONFIG}
-WORKDIR /home/root
 COPY entrypoint.sh /entrypoint.sh
 COPY resources/SpaceEngineers-Dedicated.cfg /home/root/SpaceEngineers-Dedicated.cfg
 RUN chmod +x /entrypoint.sh
