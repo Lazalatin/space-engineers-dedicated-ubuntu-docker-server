@@ -45,6 +45,9 @@ if [ ! -f "${CONFIG}"/SpaceEngineers-Dedicated.cfg ]; then
   sed -i "s=<ServerPort>.*</ServerPort>=<ServerPort>${SERVER_PORT}</ServerPort>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
   sed -i "s=<RemoteApiPort>.*</RemoteApiPort>=<RemoteApiPortPort>${REMOTE_API_PORT}</RemoteApiPort>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
 
+  # Change security api key
+  sed -i "s=<RemoteSecurityKey>.*</RemoteSecurityKey>=<RemoteSecurityKey>${REMOTE_SECURITY_KEY}</RemoteSecurityKey>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
+
   # Change save path to value from config
   sed -i "s=<ServerName>.*</ServerName>=<ServerName>${SERVER_NAME}</ServerName>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg
   sed -i "s=<WorldName>.*</WorldName>=<WorldName>${WORLD_NAME}</WorldName>=g" ${CONFIG}/SpaceEngineers-Dedicated.cfg

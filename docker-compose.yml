@@ -4,16 +4,17 @@ services:
     build: .
     image: lazalatin/space-engineers-dedicated-ubuntu-docker-server:v1
     ports:
-      - "8766:8766/udp"
-      - "27016:27016/udp"
-      - "8080:8080/tcp"
+      - "8766:8766/udp" # This is for the server to connect to steam
+      - "27016:27016/udp" # This is for the server to be actually accessed
+      #- "8080:8080/tcp" # This is for the remote Server Api to be accessed
     volumes:
-      - /opt/SpaceEngineersDedicatedServer:/root/.wine/drive_c/SpaceEngineersDedicatedServer/
-      - /opt/SpaceEngineersDedicated:/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated/
+      - /opt/SpaceEngineersDedicatedServer:/root/.wine/drive_c/SpaceEngineersDedicatedServer/ # Where the actual installation of the server will be stored
+      - /opt/SpaceEngineersDedicated:/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated/ # Where your server data should be copied to manually
     environment:
       - SERVER_NAME=DockerDedicated
       - WORLD_NAME=DockerWorld
       - STEAM_PORT=8766
       - SERVER_PORT=27016
       - REMOTE_API_PORT=8080
+      - REMOTE_SECURITY_KEY=3fwcdaWvLfTcxC1vQL33ow== # This is a sample security key. In order to use the Remote API, CHANGE IT!
       #- WINEDEBUG=-all # Uncomment to make wine all quiet
