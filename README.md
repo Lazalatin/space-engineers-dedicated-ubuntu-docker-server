@@ -13,6 +13,8 @@ Regarding the needed Hardware Requirements for Space Engineers® Dedicated Serve
 
 ### How to run
 First you need to actually start the Dedicated Server Software using a genuine Windows® installation and generate a world using the local console.
+Second, **start the server using the GUI once**. This may be necessary to generate additional data.
+Third, **save the data of the newly generated world using the save button**.
 After that you need to copy the worlds data (normally to be found at path `C:\Users\<yourUsername>\AppData\Roaming\SpaceEngineersDedicated\`) to your serving machine. 
 
 Adjust environment variables (such as the path where you copied your server data) in `docker-compose.yml` and server settings in `resources/SpaceEngineers-Dedicated.cfg` 
