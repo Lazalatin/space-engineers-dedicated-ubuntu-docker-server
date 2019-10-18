@@ -7,7 +7,9 @@ Many parts of this project were compared with and adapted from https://github.co
 Thank you, Johan Bregell, for making your work open-source for me to learn from! 
 
 ### Requirements
-To use this repository you need at least `docker-compose` version `1.10.0`.
+To use this repository you need at least:
+- `docker-compose` version `1.10.0`
+- `docker` version `v17.05`
 
 If you lack a recent version of `docker-compose` you may change the `version` property of the [docker-compose.yml](./docker-compose.yml) to `'2'`, which should also work.
 
