@@ -1,5 +1,8 @@
-FROM ubuntu:18.04 as preStage
-ENV DEBIAN_FRONTEND=noninteractive
+FROM ubuntu:18.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    WINEARCH=win64 \
+    WINEDEBUG=fixme-all
 
 # Install dependencies needed for installation and using PPAs and Locales
 RUN apt-get -q update && \
@@ -12,9 +15,6 @@ RUN apt-get -q update && \
     localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
     export LANG=en_US.UTF-8 && \
     apt-get clean autoclean && apt-get -y autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
-
-FROM preStage as wineStage
-ENV WINEARCH=win64 WINEDEBUG=fixme-all
 
 RUN (cd /usr/bin; \
         wget "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks") && \
@@ -38,9 +38,6 @@ RUN dpkg --add-architecture i386 && \
     winetricks --unattended dotnet472 corefonts dxvk && \
     apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-FROM wineStage as steamStage
-# Install steamcmd and clear apts caches
-# Link steamcmd binary to /usr/bin to use it in PATH
 RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
     apt-get -q update && \
     apt-get -y install \
@@ -50,8 +47,6 @@ RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
     ln -s /usr/games/steamcmd /usr/bin/steamcmd && \
     apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-FROM steamStage as setupStage
-#### PREPARE ALL ENVIRONMENT DEFAULTS FOR USAGE WITH DOCKER COMPOSE ####
 # The following part was gladly adapted and extended
 # from https://github.com/bregell/docker_space_engineers_server/blob/38c7d3d8f2b6bdbfcfb45f84b3b2df1c128eb99f/Dockerfile
 # Licenced under MIT by Johan Bregell
