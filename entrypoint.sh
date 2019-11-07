@@ -3,37 +3,35 @@
 # Find the original here:
 # https://github.com/bregell/docker_space_engineers_server/blob/38c7d3d8f2b6bdbfcfb45f84b3b2df1c128eb99f/entrypoint.sh
 
-set -eu
+set -eo pipefail
 
-mkdir -p "${WORK}"
-mkdir -p "${CONFIG}"
-
-mkdir -p "${CONFIG}"/Saves
-mkdir -p "${CONFIG}"/Mods
-mkdir -p "${CONFIG}"/Updater
-
+mkdir -p "${CONFIG}"/{Saves,Mods,Updater}
 if [[ -d "${WORK}"/"${WORLD_NAME}" ]]; then
-  # Copy save to save location
-  cp -r "${WORK}"/"${WORLD_NAME}" "${CONFIG}"/Saves/
-  chown -R root:root "${CONFIG}"/Saves/"${WORLD_NAME}"
+  cp -r --reflink=auto --no-preserve=ownership \
+    "${WORK}"/"${WORLD_NAME}" "${CONFIG}"/Saves/
 fi
 
 if [[ ! -s "${CONFIG}"/SpaceEngineers-Dedicated.cfg ]]; then
-  cp /home/root/SpaceEngineers-Dedicated.cfg "${CONFIG}"/
-
+  # Upsert a default configuration with sane defaults for this containerized environment.
   : ${WORLD_SAVE_WINE_PATH:="C:\\\users\\\root\\\AppData\\\Roaming\\\SpaceEngineersDedicated\\\Saves\\"}
   : ${PREMADE_WINE_PATH:="C:\\\space-engineers-server\\\Content\\\CustomWorlds\\\Star System"}
 
-  sed -i \
-    -e "s=<SteamPort>.*</SteamPort>=<SteamPort>${STEAM_PORT}</SteamPort>=g" \
-    -e "s=<ServerPort>.*</ServerPort>=<ServerPort>${SERVER_PORT}</ServerPort>=g" \
-    -e "s=<RemoteApiPort>.*</RemoteApiPort>=<RemoteApiPort>${REMOTE_API_PORT}</RemoteApiPort>=g" \
-    -e "s=<RemoteSecurityKey>.*</RemoteSecurityKey>=<RemoteSecurityKey>${REMOTE_SECURITY_KEY}</RemoteSecurityKey>=g" \
-    -e "s=<ServerName>.*</ServerName>=<ServerName>${SERVER_NAME}</ServerName>=g" \
-    -e "s=<WorldName>.*</WorldName>=<WorldName>${WORLD_NAME}</WorldName>=g" \
-    -e "s=<LoadWorld>.*</LoadWorld>=<LoadWorld>${WORLD_SAVE_WINE_PATH}\\${WORLD_NAME}</LoadWorld>=g" \
-    -e "s=<PremadeCheckpointPath>.*</PremadeCheckpointPath>=<PremadeCheckpointPath>${PREMADE_WINE_PATH}</PremadeCheckpointPath>=g" \
-    "${CONFIG}"/SpaceEngineers-Dedicated.cfg
+  declare -A defaults=(
+    [SteamPort]="${STEAM_PORT}"
+    [ServerPort]="${SERVER_PORT}"
+    [RemoteApiPort]="${REMOTE_API_PORT}"
+    [RemoteSecurityKey]="${REMOTE_SECURITY_KEY}"
+    [ServerName]="${SERVER_NAME}"
+    [WorldName]="${WORLD_NAME}"
+    [LoadWorld]="${WORLD_SAVE_WINE_PATH}\\${WORLD_NAME}"
+    [PremadeCheckpointPath]="${PREMADE_WINE_PATH}"
+  )
+  modifications=()
+  for tag in "${!defaults[@]}"; do
+    modifications+=("-e" "s=<${tag}>.*</${tag}>=<${tag}>${defaults[$tag]}</${tag}>=g")
+  done
+
+  </home/root/SpaceEngineers-Dedicated.cfg sed "${modifications[@]}" >"${CONFIG}"/SpaceEngineers-Dedicated.cfg
 fi
 
 steamcmd \
@@ -42,11 +40,11 @@ steamcmd \
   +app_update 298740 \
   +quit
 
-export CONFIG_WINE_PATH="$(winepath -w -0 "${CONFIG}")"
+# Allow for a different IP in case the operator runs this image with "--net=host"
+# on a multi-homed server, or multiple instances of this game.
+: ${SERVER_IP:="0.0.0.0"}
 
 exec wine64 \
   C:\\SpaceEngineersDedicatedServer\\DedicatedServer64\\SpaceEngineersDedicated.exe \
-  -noconsole \
-  -ip 0.0.0.0 \
-  -ignorelastsession \
-  -path "${CONFIG_WINE_PATH}"
+  -noconsole -ignorelastsession \
+  -ip "${SERVER_IP}" -path "$(winepath -w -0 "${CONFIG}")"
