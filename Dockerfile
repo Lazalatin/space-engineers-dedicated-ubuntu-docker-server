@@ -1,92 +1,71 @@
-FROM ubuntu:18.04 as preStage
-MAINTAINER Lazalatin <lazalatin@tutamail.com>
+FROM ubuntu:18.04
 
-RUN set -x
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    WINEARCH=win64 \
+    WINEDEBUG=fixme-all
 
 # Install dependencies needed for installation and using PPAs and Locales
-RUN apt-get update && \
-    apt-get install --no-install-recommends --no-install-suggests -y apt-utils wget xvfb software-properties-common \
-        apt-transport-https gnupg lib32stdc++6 lib32gcc1 ca-certificates sed xvfb locales && \
-    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LANG en_US.utf8
+RUN apt-get -q update && \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        apt-utils apt-transport-https ca-certificates \
+        software-properties-common gnupg \
+        lib32stdc++6 lib32gcc1 \
+        sed wget xvfb locales cabextract \
+        && \
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 && \
+    export LANG=en_US.UTF-8 && \
+    apt-get clean autoclean && apt-get -y autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-# Clean Apt Data
-RUN apt-get clean autoclean \
-    	&& apt-get autoremove -y \
-    	&& rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN (cd /usr/bin; \
+        wget "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks") && \
+    chmod a+x /usr/bin/winetricks && \
+    (cd /usr/share/bash-completion/completions; \
+        wget "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion")
 
-
-
-FROM preStage as wineStage
-#### PREPARE WINE ENVIRONMENT FOR SPACE ENGINEERS DEDICATED SERVER ####
-ENV WINEARCH=win64
-# Initalize winetricks script and additional dependencies
-ADD resources/install_winetricks.sh /root/install_winetricks.sh
-RUN apt-get install --no-install-recommends --no-install-suggests -y cabextract apt-transport-https && \
-    bash /root/install_winetricks.sh && rm /root/install_winetricks.sh
-
-# Initialize repositories for wine and install it
 RUN dpkg --add-architecture i386 && \
     wget -nc https://dl.winehq.org/wine-builds/winehq.key && \
     apt-key add winehq.key && rm winehq.key && \
-    apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/ && \
-    add-apt-repository ppa:cybermax-dexter/sdl2-backport
-RUN apt-get update && \
-    apt-get install --no-install-recommends --no-install-suggests -y \
-        winehq-devel wine-devel wine-devel-i386 wine-devel-amd64
+    add-apt-repository https://dl.winehq.org/wine-builds/ubuntu/ && \
+    add-apt-repository ppa:cybermax-dexter/sdl2-backport && \
+    apt-get -q update && \
+    apt-get --no-install-recommends --no-install-suggests -y install \
+        winehq-devel wine-devel wine-devel-i386 wine-devel-amd64 \
+        && \
+    rm -rf /root/.wine && \
+    env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init && \
+    xvfb-run winetricks --unattended vcrun2013 vcrun2017 && \
+    wineboot --init && \
+    winetricks --unattended dotnet472 corefonts dxvk && \
+    apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-# Cleanup .wine folder (in case a default prefix got accidentially created)
-# Prepare new 64-bit prefix and install dotNet472 and vcrun2017
-# This one-liner is necessary because wineserver must be started via wineboot in order to use winetricks
-RUN rm -rf /root/.wine && env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init && \
-    xvfb-run winetricks --unattended vcrun2013 vcrun2017
-RUN wineboot --init && winetricks --unattended dotnet472 corefonts dxvk
-
-# Make Wine quiet(er)
-# Only err: messages will be shown
-ENV WINEDEBUG=fixme-all
-
-# Clean Apt Data
-RUN apt-get clean autoclean \
-    	&& apt-get autoremove -y \
-    	&& rm -rf /var/lib/{apt,dpkg,cache,log}/
-
-
-
-FROM wineStage as steamStage
-# Install steamcmd and clear apts caches
-# Link steamcmd binary to /usr/bin to use it in PATH
 RUN echo steam steam/question select "I AGREE" | debconf-set-selections && \
-    apt-get install -y steamcmd:i386 && rm -rf /var/lib/apt/lists/* && \
-    ln -s /usr/games/steamcmd /usr/bin/steamcmd
+    apt-get -q update && \
+    apt-get -y install \
+        steamcmd:i386 \
+        winbind \
+        && \
+    ln -s /usr/games/steamcmd /usr/bin/steamcmd && \
+    apt-get clean autoclean && apt-get autoremove -y && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
-RUN apt-get update && apt-get install -y winbind
-
-FROM steamStage as setupStage
-#### PREPARE ALL ENVIRONMENT DEFAULTS FOR USAGE WITH DOCKER COMPOSE ####
 # The following part was gladly adapted and extended
 # from https://github.com/bregell/docker_space_engineers_server/blob/38c7d3d8f2b6bdbfcfb45f84b3b2df1c128eb99f/Dockerfile
 # Licenced under MIT by Johan Bregell
-ENV WORK "/root/.wine/drive_c/SpaceEngineersDedicatedServer"
-ENV CONFIG "/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated"
-ENV SERVER_NAME DockerDedicated
-ENV WORLD_NAME DockerWorld
-ENV STEAM_PORT 8766
-ENV SERVER_PORT 27016
-ENV REMOTE_API_PORT 8080
+ENV WORK="/root/.wine/drive_c/SpaceEngineersDedicatedServer" \
+    CONFIG="/root/.wine/drive_c/users/root/AppData/Roaming/SpaceEngineersDedicated" \
+    SERVER_NAME=DockerDedicated \
+    WORLD_NAME=DockerWorld \
+    STEAM_PORT=8766 \
+    SERVER_PORT=27016 \
+    REMOTE_API_PORT=8080
 
-RUN mkdir -p ${WORK}
-RUN mkdir -p ${CONFIG}
 COPY entrypoint.sh /entrypoint.sh
 COPY resources/SpaceEngineers-Dedicated.cfg /home/root/SpaceEngineers-Dedicated.cfg
-RUN chmod +x /entrypoint.sh
 
-WORKDIR ${WORK}
-ENTRYPOINT ["/entrypoint.sh"]
+RUN mkdir -p "${WORK}" && \
+    mkdir -p "${CONFIG}" && \
+    chmod +x /entrypoint.sh
 
 VOLUME ${WORK}
-
-EXPOSE ${STEAM_PORT}/udp
-EXPOSE ${SERVER_PORT}/udp
-EXPOSE ${REMOTE_API_PORT}/tcp
+WORKDIR ${WORK}
+ENTRYPOINT ["/entrypoint.sh"]
+EXPOSE ${STEAM_PORT}/udp ${SERVER_PORT}/udp ${REMOTE_API_PORT}/tcp
