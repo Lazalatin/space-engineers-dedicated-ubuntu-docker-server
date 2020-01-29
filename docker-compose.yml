@@ -16,5 +16,6 @@ services:
       - STEAM_PORT=8766
       - SERVER_PORT=27016
       - REMOTE_API_PORT=8080
-      - REMOTE_SECURITY_KEY=3fwcdaWvLfTcxC1vQL33ow== # This is a sample security key. In order to use the Remote API, CHANGE IT!
+      # This is a sample security key. In order to use the Remote API, CHANGE IT!
+      - REMOTE_SECURITY_KEY=3fwcdaWvLfTcxC1vQL33ow== 
       #- WINEDEBUG=-all # Uncomment to make wine all quiet
