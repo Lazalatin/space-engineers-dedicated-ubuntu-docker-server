@@ -1,0 +1,6 @@
+# Ignore the docker-compose override file
+docker-compose.override.yml
+
+# Ignore any local files and folders that may be loaded by the user
+/*.local.*
+/*.local/
