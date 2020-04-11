@@ -14,7 +14,7 @@ fi
 if [[ ! -s "${CONFIG}"/SpaceEngineers-Dedicated.cfg ]]; then
   # Upsert a default configuration with sane defaults for this containerized environment.
   : ${WORLD_SAVE_WINE_PATH:="C:\\\users\\\root\\\AppData\\\Roaming\\\SpaceEngineersDedicated\\\Saves\\"}
-  : ${PREMADE_WINE_PATH:="C:\\\space-engineers-server\\\Content\\\CustomWorlds\\\Star System"}
+  : ${PREMADE_WINE_PATH:="C:\\\SpaceEngineersDedicatedServer\\\Content\\\CustomWorlds\\\Star System"}
 
   declare -A defaults=(
     [SteamPort]="${STEAM_PORT}"
@@ -26,9 +26,10 @@ if [[ ! -s "${CONFIG}"/SpaceEngineers-Dedicated.cfg ]]; then
     [LoadWorld]="${WORLD_SAVE_WINE_PATH}\\${WORLD_NAME}"
     [PremadeCheckpointPath]="${PREMADE_WINE_PATH}"
   )
+
   modifications=()
   for tag in "${!defaults[@]}"; do
-    modifications+=("-e" "s=<${tag}>.*</${tag}>=<${tag}>${defaults[$tag]}</${tag}>=g")
+    modifications+=("-e" "s#<${tag}>.*</${tag}>#<${tag}>${defaults[$tag]}</${tag}>#g")
   done
 
   </home/root/SpaceEngineers-Dedicated.cfg sed "${modifications[@]}" >"${CONFIG}"/SpaceEngineers-Dedicated.cfg
@@ -44,7 +45,11 @@ steamcmd \
 # on a multi-homed server, or multiple instances of this game.
 : ${SERVER_IP:="0.0.0.0"}
 
+# Change the working directory to the directory containing the steam binaries,
+# otherwise the game server won't start.
+cd "${WORK}/DedicatedServer64"
+
 exec wine64 \
-  C:\\SpaceEngineersDedicatedServer\\DedicatedServer64\\SpaceEngineersDedicated.exe \
+  SpaceEngineersDedicated.exe \
   -noconsole -ignorelastsession \
-  -ip "${SERVER_IP}" -path "$(winepath -w -0 "${CONFIG}")"
+  -ip "${SERVER_IP}" -path "$(winepath -w "${CONFIG}")"
