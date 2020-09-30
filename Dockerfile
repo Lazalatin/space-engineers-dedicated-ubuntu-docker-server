@@ -29,7 +29,7 @@ RUN dpkg --add-architecture i386 && \
     add-apt-repository ppa:cybermax-dexter/sdl2-backport && \
     apt-get -q update && \
     apt-get --no-install-recommends --no-install-suggests -y install \
-        winehq-devel wine-devel wine-devel-i386 wine-devel-amd64 \
+        winehq-devel=5.11~bionic wine-devel=5.11~bionic wine-devel-i386=5.11~bionic wine-devel-amd64=5.11~bionic \
         && \
     rm -rf /root/.wine && \
     env WINEDLLOVERRIDES="mscoree,mshtml=" wineboot --init && \
