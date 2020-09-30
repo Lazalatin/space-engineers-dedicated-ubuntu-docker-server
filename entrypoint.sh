@@ -37,6 +37,7 @@ fi
 
 steamcmd \
   +login anonymous \
+  +@sSteamCmdForcePlatformType windows \
   +force_install_dir "${WORK}" \
   +app_update 298740 \
   +quit
