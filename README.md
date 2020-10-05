@@ -1,5 +1,5 @@
 # space-engineers-dedicated-ubuntu-docker-server
-This project aims to provide an ubuntu docker image in order to host a fully functional dedicated Space Engineers® Server
+This project aims to provide an ubuntu docker image in order to host a fully functional dedicated Space Engineers® Server under Linux OSes
 
 ### Credits
 Many parts of this project were compared with and adapted from https://github.com/bregell/docker_space_engineers_server
@@ -10,6 +10,9 @@ Thank you, Johan Bregell, for making your work open-source for me to learn from!
 To use this repository you need at least:
 - `docker-compose` version `1.10.0`
 - `docker` version `v17.05`
+
+**Please note, that this repository intends to run SpaceEngineers Server under Linux OSes. Windows is _not_ a target platform of this project!**
+*But, I encourage you to fork and alter this project, if you like to use it under Windows too.*
 
 If you lack a recent version of `docker-compose` you may change the `version` property of the [docker-compose.yml](./docker-compose.yml) to `'2'`, which should also work.
 
@@ -26,7 +29,8 @@ Regarding the needed Hardware Requirements for Space Engineers® Dedicated Serve
 See, now you are running a fully customizable Space Engineers® Dedicated Server!
 
 ### Known issues
-See the [issues](./issues).
+- As of today the performance is very poor. Multiplayer is barely possible and degrades greatly after first constructions are built.
+- See the [issues](./issues).
 
 ### How to contribute
 See the [contributing rules](./CONTRIBUTING.md).
