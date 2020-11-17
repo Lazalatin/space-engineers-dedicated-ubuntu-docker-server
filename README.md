@@ -1,6 +1,19 @@
 # space-engineers-dedicated-ubuntu-docker-server
 This project aims to provide an ubuntu docker image in order to host a fully functional dedicated Space Engineers® Server under Linux OSes
 
+# This project is archived!
+As of now this build is not what I wanted it to be, there are too many pitfalls and the performance is still poor.
+As I gave up on doing this myself and stumbled over better solutions, this repository is going to be archived.
+You may continue by forking this project or by going with one of the following projects:
+
+- https://hub.docker.com/repository/docker/devidian/spaceengineers
+  - https://github.com/Devidian/docker-spaceengineers
+- https://hub.docker.com/r/mmmaxwwwell/space-engineers-dedicated-docker-linux
+  - https://mmmaxwwwell/space-engineers-dedicated-docker-linux
+
+----
+
+
 ### Credits
 Many parts of this project were compared with and adapted from https://github.com/bregell/docker_space_engineers_server
 
